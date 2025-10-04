@@ -7,6 +7,8 @@ export default function Home() {
   const [inputText, setInputText] = useState('');
   const [caption, setCaption] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // حالة جديدة لزر النسخ
+  const [copyStatus, setCopyStatus] = useState('Скопировать');
 
   // دالة لمعالجة إرسال النص واستدعاء API Route
   const generateCaption = useCallback(async (e) => {
@@ -15,9 +17,9 @@ export default function Home() {
 
     setIsLoading(true);
     setCaption('');
+    setCopyStatus('Скопировать'); // إعادة تعيين حالة النسخ
 
     try {
-      // الاتصال بـ API Route الجديد (/api/generate)
       const apiResponse = await fetch('/api/generate', {
         method: 'POST',
         headers: {
@@ -31,30 +33,41 @@ export default function Home() {
       if (apiResponse.ok) {
         setCaption(data.caption);
       } else {
-        // التعامل مع الأخطاء التي تأتي من الخادم (باستخدام user_message بالروسية)
         const errorMessage = data.user_message || 'Произошла ошибка на сервере.'; 
         setCaption(`Ошибка: ${errorMessage}`);
       }
 
     } catch (error) {
       console.error('Fetch Error:', error);
-      // رسالة خطأ الشبكة بالروسية
       setCaption('Ошибка сети. Пожалуйста, проверьте ваше соединение.'); 
     } finally {
       setIsLoading(false);
     }
   }, [inputText]);
+  
+  // دالة نسخ النص إلى الحافظة
+  const copyToClipboard = useCallback(() => {
+    if (caption) {
+      navigator.clipboard.writeText(caption)
+        .then(() => {
+          setCopyStatus('Скопировано! ✅');
+          setTimeout(() => setCopyStatus('Скопировать'), 2000); // تعيين حالة النسخ مرة أخرى بعد ثانيتين
+        })
+        .catch(err => {
+          console.error('Could not copy text: ', err);
+          setCopyStatus('Ошибка копирования ❌');
+        });
+    }
+  }, [caption]);
 
   return (
     <div className="container">
       <Head>
-        {/* العناوين والميتا تاج باللغة الروسية */}
         <title>Генератор Неотразимых Туристических Текстов | Gemini AI</title>
         <meta name="description" content="Генератор суперпривлекательных туристических текстов (Captions) с использованием Gemini AI." />
       </Head>
 
       <main className="main-content">
-        {/* العناوين الرئيسية بالروسية */}
         <h1>Создание Неотразимых Туристических Текстов 🌍✨</h1>
         <p>Введите вашу идею или краткое описание, и пусть ИИ превратит его в неотразимый призыв для туристов!</p>
 
@@ -67,7 +80,8 @@ export default function Home() {
             disabled={isLoading}
           />
           <button type="submit" disabled={isLoading || !inputText.trim()}>
-            {isLoading ? 'Генерируется...' : 'Создать мощный текст!'}
+            {/* عرض رمز التحميل بدلاً من النص عند التحميل */}
+            {isLoading ? <div className="spinner"></div> : 'Создать мощный текст!'}
           </button>
         </form>
 
@@ -75,12 +89,20 @@ export default function Home() {
           <div className="caption-result">
             <h2>Ваш Привлекательный Текст:</h2> 
             <p className="caption-text">{caption}</p>
+            {/* زر النسخ الجديد */}
+            <button 
+              onClick={copyToClipboard} 
+              className="copy-button"
+              disabled={!caption}
+            >
+              {copyStatus}
+            </button>
           </div>
         )}
       </main>
 
       <style jsx global>{`
-        /* إعادة تعيين بسيطة وتطبيق الخطوط */
+        /* ... كود التصميم الأساسي (الخلفية، الألوان، الخطوط) كما هو ... */
         body {
           margin: 0;
           padding: 0;
@@ -115,7 +137,6 @@ export default function Home() {
           text-align: center;
         }
 
-        /* تعديل لون الزر والعنوان ليناسب الأجواء الدافئة */
         h1 {
           color: #ffcc00; /* لون ذهبي/أصفر لامع */
           margin-bottom: 10px;
@@ -127,7 +148,6 @@ export default function Home() {
           margin-bottom: 30px;
         }
 
-        /* منطقة الإدخال والزر */
         .form-area {
           display: flex;
           flex-direction: column;
@@ -161,6 +181,9 @@ export default function Home() {
           cursor: pointer;
           transition: background-color 0.3s ease, transform 0.1s ease;
           font-weight: bold;
+          display: flex; /* لتوسيط Spinner */
+          justify-content: center;
+          align-items: center;
         }
 
         button:hover:not(:disabled) {
@@ -173,7 +196,6 @@ export default function Home() {
           cursor: not-allowed;
         }
 
-        /* منطقة النتيجة */
         .caption-result {
           margin-top: 40px;
           padding: 20px;
@@ -193,6 +215,36 @@ export default function Home() {
           font-weight: 500;
           color: #f0f8ff;
           line-height: 1.6;
+          margin-bottom: 15px; /* مسافة قبل زر النسخ */
+        }
+
+        /* تنسيق زر النسخ */
+        .copy-button {
+            background-color: #00a8e8; /* لون أزرق لزر النسخ لتمييزه */
+            color: white;
+            width: 50%; /* عرض مناسب لزر النسخ */
+            margin: 10px auto 0; /* توسيطه أسفل النص */
+        }
+
+        .copy-button:hover:not(:disabled) {
+          background-color: #0096cc;
+          transform: translateY(-2px);
+        }
+
+
+        /* >>>>>> تنسيق رمز التحميل (Spinner) <<<<<< */
+        .spinner {
+          border: 4px solid rgba(255, 255, 255, 0.3);
+          border-top: 4px solid #fff; /* لون الذهبي للخلفية */
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
         /* استجابة للهواتف الصغيرة */
