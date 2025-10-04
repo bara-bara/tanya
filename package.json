@@ -9,13 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "أحدث إصدار",
-    "react": "أحدث إصدار",
-    "react-dom": "أحدث إصدار",
+    "next": "latest",            <-- عدلت هنا
+    "react": "latest",           <-- عدلت هنا
+    "react-dom": "latest",       <-- عدلت هنا
     "@google/genai": "^0.1.0"
   },
   "devDependencies": {
-    "eslint": "أحدث إصدار",
-    "eslint-config-next": "أحدث إصدار"
+    "eslint": "latest",          <-- عدلت هنا
+    "eslint-config-next": "latest" <-- عدلت هنا
   }
 }
