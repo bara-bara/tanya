@@ -12,7 +12,7 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "@google/genai": "^0.1.0"
+    "@google/genai": "latest",
   },
   "devDependencies": {
     "eslint": "latest",
