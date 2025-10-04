@@ -3,11 +3,6 @@
 import Head from 'next/head';
 import { useState, useCallback } from 'react';
 
-// تم حذف: import { GoogleGenAI } from "@google/genai";
-// تم حذف: const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
-// تم حذف: const SYSTEM_INSTRUCTION = "..."
-// هذا هو التعديل الضروري لحل مشكلة 'client-side exception'
-
 export default function Home() {
   const [inputText, setInputText] = useState('');
   const [caption, setCaption] = useState('');
@@ -28,7 +23,6 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        // إرسال النص المدخل إلى الـ API Route
         body: JSON.stringify({ promptText: inputText }),
       });
 
@@ -37,13 +31,15 @@ export default function Home() {
       if (apiResponse.ok) {
         setCaption(data.caption);
       } else {
-        // التعامل مع الأخطاء التي تأتي من الخادم
-        setCaption(`خطأ: ${data.error || 'فشل الاتصال بالخادم.'}`);
+        // التعامل مع الأخطاء التي تأتي من الخادم (باستخدام user_message بالروسية)
+        const errorMessage = data.user_message || 'Произошла ошибка на сервере.'; 
+        setCaption(`Ошибка: ${errorMessage}`);
       }
 
     } catch (error) {
       console.error('Fetch Error:', error);
-      setCaption('حدث خطأ في الشبكة. يرجى التحقق من اتصالك.');
+      // رسالة خطأ الشبكة بالروسية
+      setCaption('Ошибка сети. Пожалуйста, проверьте ваше соединение.'); 
     } finally {
       setIsLoading(false);
     }
@@ -52,45 +48,49 @@ export default function Home() {
   return (
     <div className="container">
       <Head>
-        <title>جاذب السياح | مولد Captions لا تُقاوم</title>
-        <meta name="description" content="مولد Captions سياحية فائقة الجاذبية باستخدام Gemini AI." />
+        {/* العناوين والميتا تاج باللغة الروسية */}
+        <title>Генератор Неотразимых Туристических Текстов | Gemini AI</title>
+        <meta name="description" content="Генератор суперпривлекательных туристических текстов (Captions) с использованием Gemini AI." />
       </Head>
 
       <main className="main-content">
-        <h1>صياغة Captions سياحية لا تُقاوم 🌍✨</h1>
-        <p>أدخل فكرتك أو وصف بسيط، ودع الذكاء الاصطناعي يحولها إلى نداء لا يقاوم للسياح!</p>
+        {/* العناوين الرئيسية بالروسية */}
+        <h1>Создание Неотразимых Туристических Текстов 🌍✨</h1>
+        <p>Введите вашу идею или краткое описание, и пусть ИИ превратит его в неотразимый призыв для туристов!</p>
 
         <form onSubmit={generateCaption} className="form-area">
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="مثال: غروب شمس هادئ على شاطئ أبيض"
+            placeholder="Пример: Тихий закат на белом пляже" 
             rows="4"
             disabled={isLoading}
           />
           <button type="submit" disabled={isLoading || !inputText.trim()}>
-            {isLoading ? 'جاري الصياغة...' : 'صِغ لي Caption خطير!'}
+            {isLoading ? 'Генерируется...' : 'Создать мощный текст!'}
           </button>
         </form>
 
         {caption && (
           <div className="caption-result">
-            <h2>الـ Caption الجذاب الخاص بك:</h2>
+            <h2>Ваш Привлекательный Текст:</h2> 
             <p className="caption-text">{caption}</p>
           </div>
         )}
       </main>
 
-      {/* احتفظ بقسم <style jsx global> كما هو تماماً، فهو يحتوي على التصميم الرائع */}
       <style jsx global>{`
         /* إعادة تعيين بسيطة وتطبيق الخطوط */
         body {
           margin: 0;
           padding: 0;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-          background: #0f2027;  /* خلفية داكنة متناسقة */
-          background: linear-gradient(to right, #2c5364, #203a43, #0f2027); /* تدرج لوني عميق ورائع */
-          color: #f0f8ff; /* لون نص فاتح للتباين */
+          
+          /* تدرج الغروب الدافئ (Warm Sunset Gradient) */
+          background: #cc2b5e;  
+          background: linear-gradient(to right, #753a88, #cc2b5e); 
+          
+          color: #f0f8ff; 
           min-height: 100vh;
         }
 
@@ -115,8 +115,9 @@ export default function Home() {
           text-align: center;
         }
 
+        /* تعديل لون الزر والعنوان ليناسب الأجواء الدافئة */
         h1 {
-          color: #4CAF50; /* لون مميز للعناوين */
+          color: #ffcc00; /* لون ذهبي/أصفر لامع */
           margin-bottom: 10px;
           font-size: 2.5em;
         }
@@ -137,25 +138,25 @@ export default function Home() {
           width: 100%;
           padding: 15px;
           border-radius: 8px;
-          border: 1px solid #4CAF50;
+          border: 1px solid #ffcc00;
           background: rgba(0, 0, 0, 0.4);
           color: #f0f8ff;
           resize: vertical;
           font-size: 1em;
-          box-sizing: border-box; /* لضمان أن العرض يشمل البادينغ */
+          box-sizing: border-box;
         }
         
         textarea:focus {
-            outline: 2px solid #4CAF50;
-            border-color: #4CAF50;
+            outline: 2px solid #ffcc00;
+            border-color: #ffcc00;
         }
 
         button {
           padding: 15px 25px;
           border: none;
           border-radius: 8px;
-          background-color: #4CAF50; /* لون الزر الأساسي */
-          color: white;
+          background-color: #ffcc00; /* لون الزر الأساسي (ذهبي) */
+          color: #333; /* نص داكن على الزر الفاتح */
           font-size: 1.1em;
           cursor: pointer;
           transition: background-color 0.3s ease, transform 0.1s ease;
@@ -163,7 +164,7 @@ export default function Home() {
         }
 
         button:hover:not(:disabled) {
-          background-color: #45a049;
+          background-color: #e6b800;
           transform: translateY(-2px);
         }
 
@@ -176,13 +177,13 @@ export default function Home() {
         .caption-result {
           margin-top: 40px;
           padding: 20px;
-          border: 2px dashed #4CAF50;
+          border: 2px dashed #ffcc00; /* حدود ذهبية متناسقة */
           border-radius: 10px;
           background: rgba(0, 0, 0, 0.2);
         }
 
         .caption-result h2 {
-          color: #4CAF50;
+          color: #ffcc00;
           font-size: 1.5em;
           margin-bottom: 10px;
         }
