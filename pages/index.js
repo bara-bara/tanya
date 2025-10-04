@@ -1,20 +1,19 @@
+// pages/index.js
+
 import Head from 'next/head';
 import { useState, useCallback } from 'react';
-import { GoogleGenAI } from "@google/genai";
 
-// تهيئة Gemini API
-// يستخرج مفتاح API من متغير البيئة الذي قمنا بتعيينه في .env.local
-const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
-
-// الوصف المحدد لدور Gemini:
-const SYSTEM_INSTRUCTION = "أنت مساعد خبير في صياغة Captions إعلانية للسياحة. مهمتك هي تحويل أي نص أو فكرة يقدمها المستخدم إلى Caption سياحي جذاب، لا يقاوم، يركز على الإثارة، المغامرة، أو الاسترخاء لجذب السياح بطريقة خطيرة ومغرية. يجب أن تكون الإجابات قصيرة ومؤثرة.";
+// تم حذف: import { GoogleGenAI } from "@google/genai";
+// تم حذف: const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+// تم حذف: const SYSTEM_INSTRUCTION = "..."
+// هذا هو التعديل الضروري لحل مشكلة 'client-side exception'
 
 export default function Home() {
   const [inputText, setInputText] = useState('');
   const [caption, setCaption] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // دالة لمعالجة إرسال النص واستدعاء API
+  // دالة لمعالجة إرسال النص واستدعاء API Route
   const generateCaption = useCallback(async (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
@@ -23,23 +22,28 @@ export default function Home() {
     setCaption('');
 
     try {
-      const prompt = `حول هذه الفكرة/النص إلى Caption سياحي جذاب لا يقاوم: "${inputText}"`;
-      
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash", // يمكنك استخدام نموذج آخر إذا لزم الأمر
-        contents: prompt,
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          // يمكن إضافة إعدادات أخرى مثل temperature أو maxOutputTokens
+      // الاتصال بـ API Route الجديد (/api/generate)
+      const apiResponse = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        // إرسال النص المدخل إلى الـ API Route
+        body: JSON.stringify({ promptText: inputText }),
       });
 
-      const generatedText = response.text.trim();
-      setCaption(generatedText);
+      const data = await apiResponse.json();
+
+      if (apiResponse.ok) {
+        setCaption(data.caption);
+      } else {
+        // التعامل مع الأخطاء التي تأتي من الخادم
+        setCaption(`خطأ: ${data.error || 'فشل الاتصال بالخادم.'}`);
+      }
 
     } catch (error) {
-      console.error('Gemini API Error:', error);
-      setCaption('حدث خطأ أثناء إنشاء الـ Caption. يرجى المحاولة مرة أخرى.');
+      console.error('Fetch Error:', error);
+      setCaption('حدث خطأ في الشبكة. يرجى التحقق من اتصالك.');
     } finally {
       setIsLoading(false);
     }
@@ -77,6 +81,7 @@ export default function Home() {
         )}
       </main>
 
+      {/* احتفظ بقسم <style jsx global> كما هو تماماً، فهو يحتوي على التصميم الرائع */}
       <style jsx global>{`
         /* إعادة تعيين بسيطة وتطبيق الخطوط */
         body {
