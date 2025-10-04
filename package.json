@@ -1,0 +1,21 @@
+{
+  "name": "tourist-caption-generator",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "أحدث إصدار",
+    "react": "أحدث إصدار",
+    "react-dom": "أحدث إصدار",
+    "@google/genai": "^0.1.0"
+  },
+  "devDependencies": {
+    "eslint": "أحدث إصدار",
+    "eslint-config-next": "أحدث إصدار"
+  }
+}
